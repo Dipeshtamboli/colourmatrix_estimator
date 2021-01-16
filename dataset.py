@@ -8,7 +8,6 @@ from PIL import Image
 
 class Dataset_from_text(Dataset):
     def __init__(self, txt_path='filepath'):
-        self.samples = list(open(txt_path))
         self.images = list(open(txt_path))
         self.transforms = transforms.Compose([transforms.ToTensor()])
         # print(images)
@@ -18,17 +17,19 @@ class Dataset_from_text(Dataset):
         # self.img_target = [(image, class_to_idx[image.split('/')[-2]]) for image in images]
         
     def __len__(self):
-        return len(self.samples)
+        return len(self.images)
 
     def __getitem__(self, index):
         path = self.images[index]
-        print(path.strip())
-        # pdb.set_trace()
+        img = Image.open( "patches/"+path.split(',')[0])
         # exit()
-        img = Image.open( "patches/"+path.strip())
         img = img.convert('RGB')
         img = self.transforms(img)
-        return img, path
+
+        targets = [torch.tensor(float(elem)) for elem in path.strip().split(',')[1:]]
+        targets = torch.tensor(targets)
+        # targets = torch.tensor(path.strip().split(',')[1:])
+        return img, targets
 
 
 
@@ -36,14 +37,16 @@ if __name__ == '__main__':
 
     mask_transforms = transforms.Compose([transforms.ToTensor()])
 
-    train_dataset = Dataset_from_text(txt_path='patches_path.txt')
+    train_dataset = Dataset_from_text(txt_path='patches_and_w.csv')
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset, 
-                                               batch_size=1,
+                                               batch_size=4,
                                                shuffle=True, 
-                                               num_workers=4)
+                                               num_workers=1)
 
     for inputs, path in train_dataloader:
         print(inputs.shape)
-        print(path)
-        break
+        print(path.shape)
+        pdb.set_trace()
+        print()
+        exit()
