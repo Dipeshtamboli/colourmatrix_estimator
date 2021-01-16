@@ -1,1 +1,2 @@
+import torchvision
 import torch
