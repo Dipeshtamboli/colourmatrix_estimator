@@ -1,42 +1,88 @@
+import torch.nn as nn
+import pdb
+import sys
+sys.path.insert(0,'../')
+from torch.autograd import Variable
+from net import FC_48_to_6
 import torch
-from fullnet import FullNet
+from net_refiner import FullNet
 # from model import Net
-from dataset import ColorNormDataset
+from dataset_refiner import Dataset_from_text
 import torchvision
 from torchvision import transforms
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 import sys
 
-dataset_txt = sys.argv[1]
+exp_name = sys.argv[1]
+window_size = int(sys.argv[2])
 
-writer = SummaryWriter(f'runs/{dataset_txt}')
+writer = SummaryWriter(f'training_data/runs/{exp_name}')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 batch_size = 128 
 
-dataset = ColorNormDataset(dataset_txt)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+# dataset = Dataset_from_text(exp_name)
+# dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+train_dataset = Dataset_from_text(txt_path='../patches_and_w.csv')
 
-print(len(dataset))
+train_dataloader = torch.utils.data.DataLoader(train_dataset, 
+                                           batch_size=4,
+                                           shuffle=False, 
+                                           num_workers=1)
 
-net = FullNet(3, output_channels=3, dilations=[1,2,2,1], n_layers=3, growth_rate=3).to(device)
-criterion = torch.nn.L1Loss()
+print(len(train_dataset))
+
+fc_model = FC_48_to_6(48)
+fc_model = fc_model.to(device)
+
+net = FullNet(9, output_channels=3, dilations=[1,2,2,1], n_layers=3, growth_rate=3).to(device)
+# criterion = torch.nn.L1Loss()
+criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=0.01, weight_decay=0.001)
 
 net.train()
 iteration = 0
-for i in range(2000):
-    for images, images_jitter in dataloader:
-        iteration += 1
+
+path_trained_w_est = "w_estimator_trained_weights.pth"
+checkpoint = torch.load(path_trained_w_est)
+fc_model.load_state_dict(checkpoint['fc_model_state_dict'])
+fc_model.eval()
+# decoder_net.load_state_dict(checkpoint['decoder_net_state_dict'])
+# optimizer_ft.load_state_dict(checkpoint['optimizer_state_dict'])
+# epoch = checkpoint['epoch']
+# loss = checkpoint['loss']
+
+input = Variable(torch.FloatTensor(10,48)).to(device)
+out = fc_model(input)
+if out.shape:
+    print("#"*5,"model imported succesfully","#"*5)
+    print("\t\t out.shape:",out.shape)
+
+# exit()
+# cuda = torch.cuda.is_available()
+FloatTensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
+m = nn.AvgPool2d((window_size, window_size), stride=(window_size, window_size))
+
+for epoch in range(100):
+    running_loss_train = 0
+    for images, targets in train_dataloader:
+        targets = torch.transpose(torch.cat(targets).reshape(6,images.shape[0]),1,0) 
+        # iteration += 1
         optimizer.zero_grad()
-        images = images.to(device)
-        images_jitter = images_jitter.to(device)
-        outs = net(images_jitter)
-        recons_images = (images_jitter-outs)
-        loss = criterion(images, recons_images)
+        images = images.to(device).type(FloatTensor)
+        targets = targets.to(device)
+        # images_jitter = images_jitter.to(device)
+        outs = net(images)
+        out_48 = m(outs).resize(outs.shape[0],int((outs.shape[3]/window_size)**2*3))
+        w_6_dim = fc_model(out_48)
+        # recons_images = (images_jitter-outs)
+        # pdb.set_trace()
+        loss = criterion(w_6_dim, targets)
         loss.backward()
         optimizer.step()
-        print(loss/batch_size)
-        writer.add_scalar('TRN LOSS / ITERATION',loss, iteration) 
-        if iteration % 20 == 0: 
-            torch.save(net.state_dict(), f'checkpoints/{dataset_txt}_{iteration}.pt')
-    if iteration > 5000: break
+        running_loss_train += loss.item() * images.size(0)
+    epoch_loss_train = running_loss_train / len(train_dataset)
+    print(f'Epoch {epoch} L2 loss on w',loss/batch_size)
+    writer.add_scalar('L2 loss on w',loss, iteration) 
+    if epoch % 20 == 0: 
+        torch.save(net.state_dict(), f'training_data/{exp_name}_{epoch}.pth')
+    
