@@ -1,6 +1,6 @@
 import torch
 from fullnet import FullNet
-from model import Net
+# from model import Net
 from dataset import ColorNormDataset
 import torchvision
 from torchvision import transforms

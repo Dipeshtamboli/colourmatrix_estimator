@@ -1,3 +1,4 @@
+from torch.autograd import Variable
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -132,5 +133,9 @@ class FullNet(nn.Module):
         return out
 
 if __name__ == '__main__':
-    net = FullNet(3, output_channels=3, dilations=[1,2,2,1], n_layers=3, growth_rate=3).to(device)
-    summary(model, (1, 28, 28))
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    net = FullNet(9, output_channels=3, dilations=[1,2,2,1], n_layers=3, growth_rate=3)
+    # summary(net, (3, 512, 512))
+    input = Variable(torch.FloatTensor(1,9, 512, 512))
+    out = net(input)
+    print("out.shape:",out.shape)
