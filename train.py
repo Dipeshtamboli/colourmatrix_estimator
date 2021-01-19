@@ -46,9 +46,9 @@ val_dataloader = torch.utils.data.DataLoader(train_dataset,
 											   shuffle=True, 
 											   num_workers=4)
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 fc_model = FC_48_to_6(48)
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 fc_model = fc_model.to(device)
 criterion_MSE = nn.MSELoss()
 optimizer_ft = optim.Adam(filter(lambda p: p.requires_grad, fc_model.parameters()),
@@ -120,7 +120,7 @@ def train_model(model, criterion, optimizer):
 		save_path = f"./training_logs/{logs_name}/models_v2/epoch:{epoch}_val_loss:{epoch_loss_val}.pth"
 		torch.save({
 			'epoch': epoch,
-			'fc_model_state_dict': fc_model.state_dict(),
+			'fc_model_state_dict': model.state_dict(),
 			# 'decoder_net_state_dict': decoder_net.state_dict(),
 			'optimizer_state_dict': optimizer.state_dict(),
 			'loss': loss,
