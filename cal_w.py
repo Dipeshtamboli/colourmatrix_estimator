@@ -11,13 +11,17 @@ def initializer():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
-images = list(open("patches_path.txt"))
+# images = list(open("patches_path.txt"))
+
+# images = glob.glob('/home/Drive2/cam17_patch/*/*/*/*.jpeg')
+images = glob.glob('/home/Drive2/patches_256/*/*/*.jpeg')
 print(len(images))
-mat_w = open('patches_and_w.csv','w')
+mat_w = open('patches_256.csv','w')
 
 with Pool(initializer=initializer) as pool:
     for img_path in images:
-        img = Image.open("patches/"+img_path.strip())
+        # img = Image.open("patches/"+img_path.strip())
+        img = Image.open(img_path.strip())
         a, _ = Wfast(img,2,0.01,1,256*256,1,True,pool)
         s = f'{img_path.strip()},{a[0][0]},{a[0][1]},{a[1][0]},{a[1][1]},{a[2][0]},{a[2][1]}\n'
         mat_w.write(s)
