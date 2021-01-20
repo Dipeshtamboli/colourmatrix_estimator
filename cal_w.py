@@ -16,7 +16,7 @@ def initializer():
 # images = glob.glob('/home/Drive2/cam17_patch/*/*/*/*.jpeg')
 images = glob.glob('/home/Drive2/patches_256/*/*/*.jpeg')
 print(len(images))
-mat_w = open('patches_256.csv','w')
+mat_w = open('patches_256_new.csv','w')
 
 with Pool(initializer=initializer) as pool:
     for img_path in images:

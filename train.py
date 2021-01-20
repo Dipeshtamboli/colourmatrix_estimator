@@ -19,6 +19,7 @@ from dataset import Dataset_from_text
 
 
 
+# py train.py "w_est_on_abhi_mat" 64 64 "1e-2" 100 "1e-5"
 logs_name = str(sys.argv[1])
 window_size = int(sys.argv[2])
 batch_size = int(sys.argv[3])
@@ -33,7 +34,7 @@ if not os.path.exists(directory):
 
 
 
-train_dataset = Dataset_from_text(txt_path='patches_and_w.csv')
+train_dataset = Dataset_from_text(txt_path='abhi_mat_w_with_path.csv')
 val_dataset = train_dataset
 
 train_dataloader = torch.utils.data.DataLoader(train_dataset, 
