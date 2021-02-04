@@ -17,7 +17,8 @@ class Dataset_from_text(Dataset):
 
 	def __getitem__(self, index):
 		path = self.images[index]
-		img = Image.open( "../patches/"+path.split(',')[0])
+		# img = Image.open( "../patches/"+path.split(',')[0])
+		img = Image.open('/home/Drive2/'+ path.split(',')[0])
 		# exit()
 
 		img = img.convert('RGB')
@@ -32,7 +33,8 @@ class Dataset_from_text(Dataset):
 		# h = np.random.rand(2, size*size)
 		h = np.ones((2, size*size))
 		image = (w.T@h).reshape(3,size,size)
-		image_E = 255*np.exp(-image)
+		# image_E = 255*np.exp(-image)
+		image_E = np.exp(-image)
 		image_E = torch.tensor(image_E)
 
 		w11, w12, w13 = float(w_given[0]), float(w_given[2]), float(w_given[4])
@@ -41,7 +43,8 @@ class Dataset_from_text(Dataset):
 		# h = np.random.rand(2, size*size)
 		h = np.ones((2, size*size))
 		image = (w.T@h).reshape(3,size,size)
-		image_H = 255*np.exp(-image)		
+		# image_H = 255*np.exp(-image)		
+		image_H = np.exp(-image)		
 		image_H = torch.tensor(image_H)
 		targets = [torch.tensor(float(elem)) for elem in path.strip().split(',')[1:]]
 		w = torch.tensor(targets)
