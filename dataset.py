@@ -21,7 +21,9 @@ class Dataset_from_text(Dataset):
 
     def __getitem__(self, index):
         path = self.images[index]
-        img = Image.open(path.split(',')[0])
+        # img = Image.open(path.split(',')[0])
+        img = Image.open('/home/Drive2/'+path.split(',')[0])
+
         # exit()
         img = img.convert('RGB')
         img = self.transforms(img)

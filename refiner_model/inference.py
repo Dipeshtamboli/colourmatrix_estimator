@@ -51,7 +51,8 @@ checkpoint = torch.load(path_trained_w_est)
 fc_model.load_state_dict(checkpoint['fc_model_state_dict'])
 fc_model.eval()
 
-refiner_model_path = "training_data/tanpure_refiner_epoch_0.pth"
+# refiner_model_path = "training_data/tanpure_refiner_epoch_0.pth"
+refiner_model_path = "training_data/L1 loss added_20_0.3761241137981415.pth"
 checkpoint2 = torch.load(refiner_model_path)
 net.load_state_dict(checkpoint2)
 net.eval()
@@ -93,7 +94,7 @@ for images, targets in train_dataloader:
     all_img = torch.cat((images, outs),1)
     all_img = torch.reshape(all_img, (batch_size*4,3,256,256)) 
     grid_imgs = make_grid(all_img, 4)
-    save_image(grid_imgs, f'tanpure_output_{set_num}.png')
+    save_image(grid_imgs, f'L1_tanpure_output_{set_num}.png')
     # pdb.set_trace()
     
 

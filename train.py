@@ -34,15 +34,15 @@ if not os.path.exists(directory):
 
 
 
-train_dataset = Dataset_from_text(txt_path='abhi_mat_w_with_path.csv')
-val_dataset = train_dataset
+train_dataset = Dataset_from_text(txt_path='/home/abhishek/w_matrices_0.csv')
+val_dataset = Dataset_from_text(txt_path='/home/abhishek/w_matrices_1.csv')
 
 train_dataloader = torch.utils.data.DataLoader(train_dataset, 
 											   batch_size=batch_size,
 											   shuffle=True, 
 											   num_workers=4)
 
-val_dataloader = torch.utils.data.DataLoader(train_dataset, 
+val_dataloader = torch.utils.data.DataLoader(val_dataset, 
 											   batch_size=batch_size,
 											   shuffle=True, 
 											   num_workers=4)
