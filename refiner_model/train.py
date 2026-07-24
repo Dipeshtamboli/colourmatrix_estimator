@@ -24,7 +24,7 @@ batch_size = 32
 
 # dataset = Dataset_from_text(exp_name)
 # dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-train_dataset = Dataset_from_text(txt_path='/home/abhishek/w_matrices_0.csv')
+train_dataset = Dataset_from_text(txt_path='data/w_matrices_0.csv')
 
 train_dataloader = torch.utils.data.DataLoader(train_dataset, 
                                            batch_size=4,
